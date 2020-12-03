@@ -58,10 +58,6 @@ answer = tf.CheckInput(
 if answer == 'quit':
     print('Exiting...')
     exit(1)
-# YesNo = ['y', 'n']
-# answer = input('Perform initial Ishin translation file cleanup?[Y/n]\n').lower()
-# while answer not in YesNo:
-#     answer = input("Invalid input. Please input \'y\' or \'n\'\n")
 
 if answer == 'y':
     tf.IshinFileCleaner(TranslationTable, TargetSeries)
@@ -81,11 +77,11 @@ while CLOSE_FILE == 0:
     # Detect segment language. If english, then iterate loop
     # This doesn't work well all of the time if segment strings are short.
     try:
-        lang = ld.detect(TargetSegment)
+        maybe_lang = ld.detect(TargetSegment)
     except:
         pass
     else:
-        if lang == 'en':
+        if maybe_lang == 'en':
             continue
 
     # Prints source segment and requests translation input
@@ -95,13 +91,6 @@ while CLOSE_FILE == 0:
     Target, TargetUpper = tf.inputTranslation()
     if TargetUpper.split()[0] in ['GETCONTEXT', 'MATCH']:
         Options.append(TargetUpper)
-
-    # if TargetUpper == "CLOSE":  # Save and close
-    #     print("\n")
-    #     break
-    # if TargetUpper == "NEXT":  # Skip this segment
-    #     print("\n")
-    #     continue
 
     if Target[0] == "^":
         print("Invalid input")
@@ -139,10 +128,7 @@ while CLOSE_FILE == 0:
                     if MatchType == 'PARTIAL':
                         MatchString = input("\nPlease enter string to match.\n")
                     else:
-                        if MatchSeries == 'SOURCE':
-                            MatchString = TranslationTable.iat[Segment - 1, SeriesDict['SOURCE']]
-                        elif MatchSeries == 'TARGET':
-                            MatchString = TranslationTable.iat[Segment - 1, SeriesDict['TARGET']]
+                        MatchString = TranslationTable.iat[Segment - 1, SeriesDict[MatchSeries]]
                     tf.MatchSegments(TranslationTable, MatchSeries, SeriesDict['SOURCE'], SeriesDict['TARGET'], MatchString, MatchType)
             tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
             Options = ResetOptions()
@@ -150,10 +136,6 @@ while CLOSE_FILE == 0:
 
         elif TargetUpper == 'PROPAGATE':
             # Propagate translation to all other target segments with a matching source segment
-            print("Please enter the translation:\n")
-            # Target, TargetUpper = tf.inputTranslation(False)
-            # MatchDf = TranslationTable.loc[SourceSegment[SeriesDict['SOURCE']]]
-            # tf.Propagate(MatchDf, 2)
             check = tf.Propagate(TranslationTable, SourceSegment, SeriesDict['SOURCE'], SeriesDict['TARGET'])
             if check == 'quit':
                 tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
