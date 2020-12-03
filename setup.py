@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name=SimpleCLITranslation,
+setup(name=simpleclitranslation,
       version=1.0,
       description='Easy CLI translator. Not very robust.',
       url='https://github.com/cloudultima3164/SimpleCLITranslation',
