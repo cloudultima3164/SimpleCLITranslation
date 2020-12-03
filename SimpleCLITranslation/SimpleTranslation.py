@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Easy translation tool for working with the XLSX format translation import tool
 
 import os
