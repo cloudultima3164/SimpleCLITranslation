@@ -58,7 +58,7 @@ python -m pip install chardet
 :: Download the translation tool directly from this page, and run it using the following command
 
 ```shell
-python <path to saved location>/SimpleCLITranslation.py
+python <path to saved location>/SimpleTranslation.py
 ```
 
 You will be prompted to select the file you wish to translate using an open file dialog.
