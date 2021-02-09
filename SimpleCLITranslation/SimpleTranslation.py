@@ -3,7 +3,6 @@
 
 import os
 import pandas as pd
-import langdetect as ld
 import miniPdFuncs as pdFuncs
 import translationFuncs as tf
 
