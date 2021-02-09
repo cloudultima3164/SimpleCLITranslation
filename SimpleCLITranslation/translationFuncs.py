@@ -1,5 +1,4 @@
-import pdFuncs
-import langdetect as ld
+import miniPdFuncs
 import numpy as np
 
 # Opens Windows open file dialog and retrurns the path of the chosen file
