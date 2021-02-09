@@ -4,6 +4,7 @@ Simple CLI Tool for translation. Definitely could be improved on in several ways
 ---Simple instructions to get up and running---
 
 Note: after each installation step, you must exit and reopen your command line interpreter for changes to take effect.
+At any point, if you cannot properly execute a command, first make sure that you have a folder corresponding to the installed tool on your PATH environment variable.
 
 :: Install Pyenv
   - Linux or Mac: https://github.com/pyenv/pyenv
