@@ -28,12 +28,17 @@ def printHelp():
     print(" RETRANSLATE: Retranslate a previous translated target segment. If you do not know the segment number,")
     print("              enter 0. The program will step through each translated segment until you quit.")
     print(" SAVE:        Save current translation progress.")
-    print(" CLOSE:       Save and close the program")
+    print(" CLOSE:       Close the program without saving.")
     print("")
 
 
 # Used to easily reset options list, as it may expand during translation due to append operations
-def ResetOptions() -> list: return ['MATCH', 'PROPAGATE', 'GETCONTEXT', 'RETRANSLATE', 'SAVE', 'HELP']
+def ResetOptions() -> list: return ['MATCH',
+                                    'PROPAGATE',
+                                    'GETCONTEXT',
+                                    'RETRANSLATE',
+                                    'SAVE',
+                                    'HELP']
 
 # Start by asking user to select file in open file dialog.
 # When we load the file into a DataFrame, we will do a little
@@ -187,7 +192,7 @@ while CLOSE_FILE == 0:
         finally:
             print("")
             Segment = GoToSegment(SegmentNumber)
-            continue
+        continue
     elif TargetUpper == "NEXT":
         print("")
         Segment = NextSegment(Segment)

@@ -135,10 +135,10 @@ def MatchSegments(Dataframe, MatchSeries, SourceIndex, TargetIndex, MatchString,
     SeriesIndexes = dict(SOURCE=SourceIndex, TARGET=TargetIndex)
     MatchSeriesIndex = SeriesIndexes[MatchSeries]
     if (MatchType in [None, 'FULL']):
-        MatchDf = pdFuncs.GetSimpMaskDf(Dataframe, MatchSeriesIndex, MatchString)
+        MatchDf = miniPdFuncs.GetSimpMaskDf(Dataframe, MatchSeriesIndex, MatchString)
     elif (MatchType == 'PARTIAL'):
         Series = Dataframe.columns[MatchSeriesIndex]
-        MatchDf = pdFuncs.GetSimpMaskDf(Dataframe, "", Dataframe[Series].str.contains(MatchString))
+        MatchDf = miniPdFuncs.GetSimpMaskDf(Dataframe, "", Dataframe[Series].str.contains(MatchString))
     if MatchDf.empty:
         print("\nNo matches found")
     else:
@@ -146,8 +146,6 @@ def MatchSegments(Dataframe, MatchSeries, SourceIndex, TargetIndex, MatchString,
         Results = ["\nSegment {}\nTarget: {}\nSource: {}".format(MatchDf.iat[x, 0], MatchDf.iat[x, SourceIndex + 1], MatchDf.iat[x, TargetIndex + 1]) for x in range(MatchDf.shape[0])]
         print("\nResults:")
         print(*Results, sep="\n")
-        Continue = CheckInput(input("\n\nEnter \'OK\' to continue.\n").lower(),
-                              Boolean="Input == 'ok'")
 
         print("\nPlease enter one of the following commands:")
         print("  PASS (Go back to entering translation)")
@@ -249,7 +247,7 @@ def retranslateSegment(Dataframe, SourceIndex, TargetIndex, SegmentIndex):
                             Choices=['y', 'n'])
 
         if Answer == 'y':
-            Target, TargetUpper = inputTranslation()
+            Target = inputTranslation()[0]
             Dataframe.iat[SegmentIndex, TargetIndex] = Target
         elif Answer == 'n':
             pass
