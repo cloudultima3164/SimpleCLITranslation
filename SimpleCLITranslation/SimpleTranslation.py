@@ -75,8 +75,20 @@ Segment = 1
 CLOSE_FILE: bool = 0
 # Loop through segments
 while CLOSE_FILE == 0:
-    SourceSegment = TranslationTable.iat[Segment - 1, SeriesDict['SOURCE']]
-    TargetSegment = TranslationTable.iat[Segment - 1, SeriesDict['TARGET']]
+    if (Segment) > TranslationTable.shape[0]:
+        Continue = tf.CheckInput(input('End of file reached. Continue editing or save and quit? [continue/save]\n'),
+                      Choices=['continue', 'save'])
+        if Continue == 'continue': 
+            Segment = PreviousSegment(Segment)
+        elif Continue == 'save':
+            print("\nSaving...")
+            pdFuncs.DfToFile(TranslationTable, File)
+            CLOSE_FILE = 1
+            continue
+
+    if CLOSE_FILE == 0:
+        SourceSegment = TranslationTable.iat[Segment - 1, SeriesDict['SOURCE']]
+        TargetSegment = TranslationTable.iat[Segment - 1, SeriesDict['TARGET']]
 
     # Detect segment language. If english, then iterate loop
     # This doesn't work well all of the time if segment strings are short.
@@ -133,10 +145,13 @@ while CLOSE_FILE == 0:
                         MatchString = input("\nPlease enter string to match.\n")
                     else:
                         MatchString = TranslationTable.iat[Segment - 1, SeriesDict[MatchSeries]]
-                    tf.MatchSegments(TranslationTable, MatchSeries, SeriesDict['SOURCE'], SeriesDict['TARGET'], MatchString, MatchType)
-            tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
-            Options = ResetOptions()
-            Target, TargetUpper = tf.inputTranslation()
+                    return_value = tf.MatchSegments(TranslationTable, MatchSeries, SeriesDict['SOURCE'], SeriesDict['TARGET'], MatchString, MatchType)
+            if return_value == 'propagate':
+                TargetUpper = 'NEXT'
+            else:
+                tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
+                Options = ResetOptions()
+                Target, TargetUpper = tf.inputTranslation()
 
         elif TargetUpper == 'PROPAGATE':
             # Propagate translation to all other target segments with a matching source segment

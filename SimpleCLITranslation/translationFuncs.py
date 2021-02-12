@@ -56,7 +56,7 @@ def CheckInput(Input, Choices: list = None, Type: type = None, Boolean: str = No
                 Input = input('Invalid input. Expected type {}, but got type {}.\n'.format(Type, type(Input))).lower()
             else:
                 type_is_correct = True
-        return Input
+        return Type(Input)
 
     Dispatcher = {
         "Choices": ListType,
@@ -100,7 +100,6 @@ def inputTranslation(Message=True):
 
 
 # Propagates an exact match over an entire document
-# def Propagate(Translation, MatchDataFrame, TargetIndex):
 def Propagate(Dataframe, SourceText, SourceIndex, TargetIndex):
     SourceName = Dataframe.columns[SourceIndex]
     TargetName = Dataframe.columns[TargetIndex]
@@ -108,26 +107,27 @@ def Propagate(Dataframe, SourceText, SourceIndex, TargetIndex):
     if MatchDataFrame.empty:
         print("No matches to propagate to.")
     else:
-        CurrentOrPrevious = CheckInput(
-                             input('Propagate a new translation or a previously translated segment? [new/previous]\n').lower(),
-                             Choices = ['new', 'previous'])
+        CurrentOrExisting = CheckInput(
+                             input('\nPropagate a new translation or an existing translated segment? [new/existing]\n').lower(),
+                             Choices = ['new', 'existing'])
 
-        if CurrentOrPrevious == 'new':
-            print('Please enter translation:')
+        if CurrentOrExisting == 'new':
+            print('\nPlease enter translation:')
             Dataframe.loc[Dataframe[SourceName] == SourceText, TargetName] = inputTranslation(False)[0]
-        elif CurrentOrPrevious == 'previous':
-            print(MatchDataFrame.head(5))
+        elif CurrentOrExisting == 'existing':
+            print(MatchDataFrame[TargetName].head(5))
             PropagateSegment = CheckInput(
-                                input('Please input the segment that will be propagated.\n'),
+                                input('Please input the segment that should be propagated.\n'),
                                 Type = int)
 
             if PropagateSegment == 'quit':
                 return 'quit'
             Dataframe.loc[Dataframe[SourceName] == SourceText, TargetName] = Dataframe.iat[PropagateSegment - 1, TargetIndex]
-        elif CurrentOrPrevious == 'quit':
+        elif CurrentOrExisting == 'quit':
             return 'quit'
-        print(Dataframe.loc[Dataframe[SourceName] == SourceText])
+        print(Dataframe.loc[Dataframe[SourceName] == SourceText, TargetName])
         print("Translation propagated")
+        return 'propagate'
 
 
 # Returns either a full or partial string match
@@ -143,26 +143,32 @@ def MatchSegments(Dataframe, MatchSeries, SourceIndex, TargetIndex, MatchString,
         print("\nNo matches found")
     else:
         MatchDf.reset_index(inplace=True)
-        Results = ["\nSegment {}\nTarget: {}\nSource: {}".format(MatchDf.iat[x, 0], MatchDf.iat[x, SourceIndex + 1], MatchDf.iat[x, TargetIndex + 1]) for x in range(MatchDf.shape[0])]
+        Results = ["\nSegment {}\nSource: {}\nTarget: {}". \
+                   format(MatchDf.iat[x, 0], MatchDf.iat[x, SourceIndex + 1],
+                          MatchDf.iat[x, TargetIndex + 1])
+                  for x in range(MatchDf.shape[0])]
+    
         print("\nResults:")
         print(*Results, sep="\n")
 
         print("\nPlease enter one of the following commands:")
         print("  PASS (Go back to entering translation)")
         print("  GETCONTEXT (Get more context for current matches)")
+        print("  PROPAGATE (Propagate a string to matching target segments)")
 
         # Processing matching options
         Option = CheckInput(input("\n").lower(),
-                            Choices=['pass', 'getcontext'])
+                            Choices=['pass', 'getcontext', 'propagate'])
         # If PASS, then simply exit the function
         if (Option.upper() == 'PASS'):
-            return
+            return 'PASS'
         # If GETCONTEXT, get matches with some surrounding segments
         # Program will print context matches in blocks and ask if the
         # user wants to continue printing
         elif (Option.upper() == 'GETCONTEXT'):
             GetContextSegs(Dataframe, MatchDataFrame=MatchDf)
-
+        elif (Option.upper() == 'PROPAGATE'):
+            return Propagate(Dataframe, MatchDf.iat[0, SourceIndex + 1], SourceIndex, TargetIndex)
 
 # Returns a segment and its surrounding segments
 def GetContextSegs(Dataframe, SegmentIndex=None, MatchDataFrame=None, PlusAlpha=0):
