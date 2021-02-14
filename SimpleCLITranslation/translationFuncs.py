@@ -74,7 +74,7 @@ def CheckInput(Input, Choices: list = None, Type: type = None, Boolean: str = No
 
 
 # Cleans up Ishin-style translation files
-def IshinFileCleaner(Dataframe, TargetIndex):
+def FileCleaner(Dataframe, TargetIndex):
     Dataframe[TargetIndex] = Dataframe[TargetIndex].map("")
     return Dataframe
 

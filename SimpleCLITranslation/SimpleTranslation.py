@@ -23,8 +23,9 @@ def parse_options():
                         help='Options to change program output. \
                               \n    \'length\': return length of source without opening file \
                               \n    \'find\': returns segments that contain specified string  \
+                              \n        use the --argument option to specify the search string. \
                               \n    \'pos_at_length\': returns the segment at which character N is found \
-                              \n        use the --position option to specify N.')
+                              \n        use the --argument option to specify N.')
     parser.add_argument('-a', '--Argument', default='',
                         help='Argument used in conjunction with the \'pos_at_length\' and \'find\' options.')
     return parser.parse_args()
@@ -163,14 +164,14 @@ def main(empty=None):
     Options = ResetOptions()
 
     answer = tf.CheckInput(
-        input('Perform initial Ishin translation file cleanup?[Y/n]\n').lower(),
+        input('Perform initial file cleanup?[Y/n]\n').lower(),
         Choices=['y','n'])
     if answer == 'quit':
         print('Exiting...')
         exit(1)
 
     if answer == 'y':
-        tf.IshinFileCleaner(TranslationTable, TargetSeries)
+        tf.FileCleaner(TranslationTable, TargetSeries)
 
     Segment = 1
     CLOSE_FILE: bool = 0
