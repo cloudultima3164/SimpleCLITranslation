@@ -86,17 +86,21 @@ def printCurrentSegment(SegmentIndex, SegmentCount, SourceSegment, TargetSegment
 
 
 # Default user prompt to enter translation or option
-def inputTranslation(Message=True):
+def inputTranslation(Message=True, valid_options=None):
+    if valid_options:
+        valid_options = [option.lower() for option in valid_options]
     if Message:
         Input = CheckInput(
             input(" Please enter a translation or an option:\n\n"),
             Boolean="(Input != '')")
         UpperInput = Input.upper()
-        return Input, UpperInput
     else:
         Input = CheckInput(input(), Boolean="(Input != '')")
         UpperInput = Input.upper()
-        return Input, UpperInput
+    if Input[0] == '-' and Input.split()[0].lower() not in valid_options:
+        print("WARNING: Invalid option. Please try again.\n")
+        return inputTranslation(Message, valid_options)
+    return Input, UpperInput
 
 
 # Propagates an exact match over an entire document

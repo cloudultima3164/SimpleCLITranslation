@@ -85,34 +85,47 @@ def find_string_at_length(position=1000):
 def printHelp():
     print("")
     print("Options:")
-    print(" NEXT:        Skip the current segment")
-    print(" PREVIOUS:    Return to the previous segment")
-    print(" GOTO:        Go to the specified segment number")
-    print("            - Syntax is \'GOTO X\', with X being the desired segment")
-    print(" MATCH:       Returns exact matches for the current segment in source segments.")
-    print("            - MATCH can be called with options PARTIAL and FULL, and SOURCE and TARGET")
-    print("            - PARTIAL matches a user-defined string, FULL matches default string and is default behavior")
-    print("            - SOURCE looks for a match in the source segments, TARGET looks for a match in the target segments")
-    print("            - GETCONTEXT (or PASS to skip GETCONTEXT) can be called within the Match function")
-    print(" PROPAGATE:   Propagates translation for the current segment in all target segments.")
-    print(" GETCONTEXT:  Returns the the current segment, and the surrounding 2 segments")
-    print("            - Syntax is \'getcontext X\' (X must be an integer), returns 2 + X surrounding segments")
-    print("            - The program will return 2 segments on either side if only \'getcontext\' is entered.")
-    print("            - If called from within the MATCH function, program will step through context for each match.")
-    print(" RETRANSLATE: Retranslate a previous translated target segment. If you do not know the segment number,")
-    print("              enter 0. The program will step through each translated segment until you quit.")
-    print(" SAVE:        Save current translation progress.")
-    print(" CLOSE:       Close the program without saving.")
+    print(" -HELP:        Display this message")
+    print(" -NEXT:        Skip the current segment")
+    print(" -PREVIOUS:    Return to the previous segment")
+    print(" -GOTO:        Go to the specified segment number")
+    print("             - Syntax is \'-GOTO X\', with X being the desired segment")
+    print(" -MATCH:       Returns exact matches for the current segment in source segments.")
+    print("             - -MATCH can be called with options PARTIAL and FULL, and SOURCE and TARGET")
+    print("             - PARTIAL matches a user-defined string, FULL matches default string and is default behavior")
+    print("             - SOURCE looks for a match in the source segments, TARGET looks for a match in the target segments")
+    print("             - -CONTEXT (or PASS to skip -CONTEXT) can be called within the Match function")
+    print(" -PROP:        Propagates a new or exisiting translation to all matching target segments.")
+    print(" -CONTEXT:     Returns the the current segment, and the surrounding 2 segments")
+    print("             - Syntax is \'getcontext X\' (X must be an integer), returns 2 + X surrounding segments")
+    print("             - The program will return 2 segments on either side if only \'getcontext\' is entered.")
+    print("             - If called from within the -MATCH function, program will step through context for each match.")
+    print(" -RETRANSLATE: Retranslate a previous translated target segment. If you do not know the segment number,")
+    print("               enter 0. The program will step through each translated segment until you quit.")
+    print(" -SAVE:        Save current translation progress.")
+    print(" -CLOSE:       Close the program without saving.")
     print("")
 
 
 # Used to easily reset options list, as it may expand during translation due to append operations
-def ResetOptions() -> list: return ['MATCH',
-                                    'PROPAGATE',
-                                    'GETCONTEXT',
-                                    'RETRANSLATE',
-                                    'SAVE',
-                                    'HELP']
+def ResetOptions() -> list: return ['-MATCH',
+                                    '-PROP',
+                                    '-CONTEXT',
+                                    '-RETRANSLATE',
+                                    '-SAVE',
+                                    '-HELP']
+
+
+def AllOptions() -> list: return ['-MATCH',
+                                  '-PROP',
+                                  '-CONTEXT',
+                                  '-RETRANSLATE',
+                                  '-SAVE',
+                                  '-HELP',
+                                  '-NEXT',
+                                  '-PREVIOUS',
+                                  '-GOTO',
+                                  '-CLOSE']
 
 # Segment movement functions
 def NextSegment(CurrentSegment) -> int: return CurrentSegment + 1
@@ -204,26 +217,19 @@ def main(empty=None):
 
         # Prints source segment and requests translation input
         # If you enter a valid option, the next while block will be executed
-        # If you enter SAVE, the program will exit the loop and save your progress
+        # If you enter -SAVE, the program will exit the loop and save your progress
         tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
-        Target, TargetUpper = tf.inputTranslation()
-        if TargetUpper.split()[0] in ['GETCONTEXT', 'MATCH']:
+        Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
+        if TargetUpper.split()[0] in ['-CONTEXT', '-MATCH']:
             Options.append(TargetUpper)
-
-        if Target[0] == "^":
-            print("Invalid input")
-            while Target[0] == "^":
-                Target, TargetUpper = tf.inputTranslation(False)
-                if TargetUpper.split()[0] == 'GETCONTEXT':
-                    Options.append(TargetUpper)
 
         # While loop for checking and propagating translations
         while TargetUpper in Options:
             while TargetUpper not in Options:
                 print("Option {} is invalid. Please choose {}".format(Target, Options))
-                Target, TargetUpper = tf.inputTranslation(False)
+                Target, TargetUpper = tf.inputTranslation(False, valid_options=AllOptions())
 
-            if TargetUpper.split()[0] == 'MATCH':
+            if TargetUpper.split()[0] == '-MATCH':
                 # Prints matching results if the same translation exists elsewhere in the document
                 try:
                     MatchSeries = TargetUpper.split()[1]
@@ -249,22 +255,22 @@ def main(empty=None):
                             MatchString = TranslationTable.iat[Segment - 1, SeriesDict[MatchSeries]]
                         return_value = tf.MatchSegments(TranslationTable, MatchSeries, SeriesDict['SOURCE'], SeriesDict['TARGET'], MatchString, MatchType)
                 if return_value == 'propagate':
-                    TargetUpper = 'NEXT'
+                    TargetUpper = '-NEXT'
                 else:
                     tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
                     Options = ResetOptions()
-                    Target, TargetUpper = tf.inputTranslation()
+                    Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
 
-            elif TargetUpper == 'PROPAGATE':
+            elif TargetUpper == '-PROP':
                 # Propagate translation to all other target segments with a matching source segment
                 check = tf.Propagate(TranslationTable, SourceSegment, SeriesDict['SOURCE'], SeriesDict['TARGET'])
                 if check == 'quit':
                     tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
-                    Target, TargetUpper = tf.inputTranslation()
+                    Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
                 else:
-                    TargetUpper = 'NEXT'
+                    TargetUpper = '-NEXT'
 
-            elif TargetUpper.split()[0] == 'GETCONTEXT':
+            elif TargetUpper.split()[0] == '-CONTEXT':
                 # Print context around current segment
                 EmptyDf = pd.DataFrame(columns=['empty'])
                 try:
@@ -274,32 +280,32 @@ def main(empty=None):
                 else:
                     tf.GetContextSegs(TranslationTable, Segment - 1, EmptyDf, PlusAlpha)
                 Options = ResetOptions()
-                Target, TargetUpper = tf.inputTranslation()
+                Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
 
-            elif TargetUpper == 'RETRANSLATE':
+            elif TargetUpper == '-RETRANSLATE':
                 # Re-translate some previously translated segment
                 Answer = int(tf.CheckInput(
                     input("Please type segment number. If you do not know it, input \'0\'\n"),
                     Type=int)) - 1
                 tf.retranslateSegment(TranslationTable, SeriesDict['SOURCE'], SeriesDict['TARGET'], int(Answer))
                 tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
-                Target, TargetUpper = tf.inputTranslation()
+                Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
 
-            elif TargetUpper == 'SAVE':
+            elif TargetUpper == '-SAVE':
                 # Save progress without closing
                 print("Saving..")
                 pdFuncs.DfToFile(TranslationTable, File)
                 tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
-                Target, TargetUpper = tf.inputTranslation()
-            elif TargetUpper == 'HELP':
+                Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
+            elif TargetUpper == '-HELP':
                 printHelp()
                 tf.printCurrentSegment(Segment, TranslationTable.shape[0], SourceSegment, TargetSegment)
-                Target, TargetUpper = tf.inputTranslation()
+                Target, TargetUpper = tf.inputTranslation(valid_options=AllOptions())
 
-            if TargetUpper.split()[0] == 'GETCONTEXT':
+            if TargetUpper.split()[0] == '-CONTEXT':
                 Options.append(TargetUpper)
 
-        if TargetUpper.split()[0] == "GOTO":
+        if TargetUpper.split()[0] == "-GOTO":
             try:
                 SegmentNumber = int(TargetUpper.split()[1])
             except:
@@ -310,15 +316,15 @@ def main(empty=None):
                 print("")
                 Segment = GoToSegment(SegmentNumber)
             continue
-        elif TargetUpper == "NEXT":
+        elif TargetUpper == "-NEXT":
             print("")
             Segment = NextSegment(Segment)
             continue
-        elif TargetUpper == "PREVIOUS":
+        elif TargetUpper == "-PREVIOUS":
             print("")
             Segment = PreviousSegment(Segment)
             continue
-        elif TargetUpper == 'CLOSE':
+        elif TargetUpper == '-CLOSE':
             CLOSE_FILE = 1
             continue
 
