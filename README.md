@@ -63,5 +63,8 @@ python <path to saved location>/SimpleTranslation.py
 
 You will be prompted to select the file you wish to translate using an open file dialog.
 Once you have selected the file, the program will read it into memory, and you are good to go!
-If you need help using the program, you can just type `help` and hit enter at any time for a description on all of the possible commands.
+If you need help understanding how the command line arguments work, run the script with option `-h`.
+If you need help using the program, you can just type `help` and hit enter at any time during program execution
+for a description on all of the possible commands.
+
 If you need more help, please open an issue.
