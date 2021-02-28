@@ -332,7 +332,7 @@ def main(empty=None):
         TranslationTable.to_csv(temp_file_path)
         if Segment == TranslationTable.index[-1]:
             CheckClose = tf.CheckInput(
-                input('Save and quit?[Y/n]').lower(),
+                input('Save and quit?[Y/n]\n').lower(),
                 Choices=['y', 'n']
                 )
             if CheckClose == 'y':
