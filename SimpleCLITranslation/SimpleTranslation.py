@@ -24,7 +24,7 @@ def parse_options():
                               \n    \'length\': return length of source without opening file \
                               \n    \'find\': returns segments that contain specified string  \
                               \n        use the --argument option to specify the search string. \
-                              \n    \'pos_at_length\': returns the segment at which character N is found \
+                              \n    \'pos_at_length\': returns the segment at which the Nth character  is found \
                               \n        use the --argument option to specify N.')
     parser.add_argument('-a', '--Argument', default='',
                         help='Argument used in conjunction with the \'pos_at_length\' and \'find\' options.')
