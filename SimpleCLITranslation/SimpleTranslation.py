@@ -53,14 +53,14 @@ def find_string(string=''):
     parse_file_output = parse_file()
     Table = parse_file_output['Table']
     SeriesIndexes = parse_file_output['SeriesIndexes']
-    mask = np.column_stack([Table[col].astype('str').str.contains(string.lower(), case=False) for col in Table.columns])
-    search_result = Table.loc[mask.any(axis=1)]
+    results = [Table[Table[col].astype('str').str.contains(string)] for col in Table]
+    results_filtered = pd.concat([Table for Table in results if not Table.empty])
     search_result_formatted =["\nSegment {}\nSource: {}\nTarget: {}". \
-                                format(search_result.index[x], 
-                                        search_result.iat[x, SeriesIndexes['SOURCE']],
-                                        search_result.iat[x, SeriesIndexes['TARGET']])
-                                for x in range(search_result.shape[0])]
-    print('\n\nMatched strings\n--------------\n')
+                                format(results_filtered.index[x], 
+                                        results_filtered.iat[x, SeriesIndexes['SOURCE']],
+                                        results_filtered.iat[x, SeriesIndexes['TARGET']])
+                                for x in range(len(results_filtered))]
+    print('\n\nMatched strings\n--------------')
     print(*search_result_formatted, sep='\n')
 
 def find_string_at_length(position=1000):
